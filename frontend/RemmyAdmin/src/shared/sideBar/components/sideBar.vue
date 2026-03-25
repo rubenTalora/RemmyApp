@@ -62,7 +62,7 @@ async function handleSignOut() {
       <SidebarItem
         label="Configuración"
         :icon="Settings"
-        to="/Configuracion"
+        to="/settings"
         action="link"
       />
     </div>

@@ -35,7 +35,23 @@ const router = createRouter({
           path: 'centers/:id/edit',
           name: 'EditCenter',
           component: () => import('@/features/Centers/views/NewCenterView.vue'),
-        }
+        },
+
+        // Settings
+        {
+          path: 'settings',
+          redirect: { name: 'SettingsProfile' },
+        },
+        {
+          path: 'settings/profile',
+          name: 'SettingsProfile',
+          component: () => import('@/features/Settings/views/ProfileView.vue'),
+        },
+        {
+          path: 'settings/admins',
+          name: 'SettingsAdmins',
+          component: () => import('@/features/Settings/views/AdminsView.vue'),
+        },
       ]
     },
   ],
