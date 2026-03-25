@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Phone, X, AlertCircle, Plus } from 'lucide-vue-next'
 
 const props = defineProps({
   form: {
@@ -29,14 +30,14 @@ const formatPhone = (phone: string): string => {
 
 const addPhone = () => {
   const phone = newPhone.value.trim()
-  
+
   if (!phone) {
-    phoneError.value = 'Por favor ingresa un número de teléfono'
+    phoneError.value = 'Por favor, introduce un número de teléfono'
     return
   }
 
   if (!validatePhone(phone)) {
-    phoneError.value = 'Por favor ingresa un teléfono válido (mínimo 9 dígitos)'
+    phoneError.value = 'Por favor, introduce un teléfono válido (mínimo 9 dígitos)'
     return
   }
 
@@ -63,72 +64,68 @@ const handleKeyPress = (event: KeyboardEvent) => {
 </script>
 
 <template>
-  <section class="form-section">
-    <div class="section-header">
-      <div class="section-icon"><img src="@/assets/icons/phone-icon.png" alt="Phone Icon" /></div>
-      <h2 class="section-title">Números de Teléfono</h2>
+  <section class="bg-white rounded-card shadow-card border border-slate-100">
+    <div class="px-6 py-4 border-b border-line bg-surface-muted flex items-center gap-2">
+      <Phone class="w-5 h-5 text-brand-500" />
+      <h2 class="text-base font-semibold text-ink">Números de Teléfono</h2>
     </div>
 
-    <div class="section-content">
-      <p class="phone-description">Añade todos los números de teléfono de contacto de tu centro</p>
-      
-      <!-- Phone Input Section -->
-      <div class="phone-input-section">
-        <div class="phone-input-group">
+    <div class="p-6">
+      <p class="text-sm text-ink-muted mb-4">Añade todos los números de teléfono de contacto del centro.</p>
+
+      <!-- Phone Input -->
+      <div class="mb-5">
+        <div class="flex gap-2">
           <input
             v-model.trim="newPhone"
             type="tel"
             placeholder="+34 600 000 000"
-            class="form-input phone-input"
+            class="flex-1 border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-colors"
             @keypress="handleKeyPress"
           />
           <button
             type="button"
-            class="btn-add-phone"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-brand-200 whitespace-nowrap"
             @click="addPhone"
           >
-            <span class="btn-plus">+</span>
+            <Plus class="w-4 h-4" />
             Añadir
           </button>
         </div>
-        <div v-if="phoneError" class="phone-error">{{ phoneError }}</div>
+        <div v-if="phoneError" class="flex items-center gap-1.5 mt-2 text-sm text-red-600">
+          <AlertCircle class="w-4 h-4 flex-shrink-0" />
+          {{ phoneError }}
+        </div>
       </div>
 
       <!-- Phone List -->
-      <div v-if="form.phone.length > 0" class="phone-list">
-        <div class="phone-list-header">
-          <span class="phone-count">{{ form.phone.length }} teléfono{{ form.phone.length !== 1 ? 's' : '' }}</span>
-        </div>
-        <div class="phone-items">
-          <div
+      <div v-if="form.phone.length > 0">
+        <p class="text-xs font-semibold text-ink-muted uppercase tracking-wide mb-3">
+          {{ form.phone.length }} teléfono{{ form.phone.length !== 1 ? 's' : '' }}
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span
             v-for="(phone, index) in form.phone"
             :key="index"
-            class="phone-item"
+            class="inline-flex items-center gap-1 bg-brand-50 text-brand-700 border border-brand-200 rounded-full px-3 py-0.5 text-sm"
           >
-            <div class="phone-item-content">
-              <span class="phone-icon">☎️</span>
-              <span class="phone-text">{{ phone }}</span>
-            </div>
+            {{ phone }}
             <button
               type="button"
-              class="remove-phone-btn"
+              class="ml-0.5 hover:text-brand-900 transition-colors"
               @click="removePhone(index)"
               title="Eliminar"
             >
-              ✕
+              <X class="w-3.5 h-3.5" />
             </button>
-          </div>
+          </span>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div v-else class="phone-empty">
-        <p>Aún no has añadido ningún número de teléfono</p>
+      <div v-else class="text-center py-6 bg-surface-muted rounded-lg">
+        <p class="text-sm text-ink-muted">Aún no se ha añadido ningún número de teléfono</p>
       </div>
     </div>
   </section>
 </template>
-
-<style lang="scss" scoped>
-@import '@/assets/styles/form.css';
-</style>

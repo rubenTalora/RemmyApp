@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { faLocationDot } from '@fortawesome/free-solid-svg-icons/faLocationDot';
-
-
+import { MapPin } from 'lucide-vue-next'
 
 defineProps({
   form: {
@@ -15,7 +13,7 @@ defineProps({
 <template>
   <section class="form-section">
     <div class="section-header">
-      <div class="section-icon"><font-awesome-icon :icon="faLocationDot" /></div>
+      <div class="section-icon"><MapPin class="w-5 h-5" /></div>
       <h2 class="section-title">Ubicación</h2>
     </div>
 
@@ -51,6 +49,3 @@ defineProps({
   </section>
 </template>
 
-<style lang="scss" scoped>
-@import '@/assets/styles/form.css';
-</style>

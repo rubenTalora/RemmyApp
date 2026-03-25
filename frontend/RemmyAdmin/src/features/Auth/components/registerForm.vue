@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import BaseButton from '@/shared/util/baseButton.vue'
+import { Check, X } from 'lucide-vue-next'
 const registerForm = ref({
   username: '',
   email: '',
@@ -80,7 +81,7 @@ const handleInputChange = (field: keyof typeof registerForm.value) => {
   <div class="login-card">
     <div class="text-center">
       <h2 class="login-title">Crear Cuenta</h2>
-      <p class="login-subtitle">Únete a nuestra comunidad hoy</p>
+      <p class="login-subtitle">Únete a nuestra comunidad</p>
     </div>
 
     <form @submit.prevent="handleSubmit" class="login-form">
@@ -157,16 +158,16 @@ const handleInputChange = (field: keyof typeof registerForm.value) => {
         />
         <div v-if="registerForm.passwordConfirm" class="password-match-status">
           <span v-if="registerForm.password === registerForm.passwordConfirm" class="match-success">
-            ✓ Las contraseñas coinciden
+            <Check class="inline w-4 h-4" /> Las contraseñas coinciden
           </span>
           <span v-else class="match-error">
-            ✗ Las contraseñas no coinciden
+            <X class="inline w-4 h-4" /> Las contraseñas no coinciden
           </span>
         </div>
         <p v-if="errors.passwordConfirm" class="error-text">{{ errors.passwordConfirm }}</p>
         </div>
 
-        <BaseButton variant="primary" label="Register" :animationEnabled="false" @click="$router.push('/login')" />
+        <BaseButton variant="primary" label="Registrarse" :animationEnabled="false" @click="$router.push('/login')" />
 
     </form>
 
@@ -177,9 +178,6 @@ const handleInputChange = (field: keyof typeof registerForm.value) => {
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/form.css';
-
-
 .text-center {
   text-align: center;
   margin-bottom: 2rem;

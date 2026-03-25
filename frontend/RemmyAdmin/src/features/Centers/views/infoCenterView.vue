@@ -1,47 +1,27 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useCentersStore } from '@/features/Centers/stores/centers'
+import type { Center } from '@/features/Centers/entities/centers'
+import {
+  ArrowLeft,
+  MapPin,
+  Phone,
+  Globe,
+  Tag,
+  Info,
+  Pencil,
+  Mail,
+  Share2,
+} from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
-
-// Center data structure (will come from API or props)
-const centerData = ref({
-  id: 1,
-  name: 'Comedor Social San José',
-  type: 'Comedor',
-  description: 'Centro de atención para personas en situación de vulnerabilidad. Ofrecemos comidas diarias y apoyo integral.',
-  street: 'Calle Mayor, 123',
-  postalCode: '28001',
-  city: 'Madrid',
-  phones: ['+34 600 000 000', '+34 912 345 678'],
-  emails: ['contacto@sjose.com', 'info@sjose.com'],
-  characteristics: ['comida', 'duchase', 'camas', 'medico', 'psicologia'],
-  social: {
-    instagram: '@comedorsanjose',
-    facebook: 'facebook.com/comedorsanjose',
-    whatsapp: '+34 600 000 000'
-  },
-  createdAt: '2024-01-15',
-  updatedAt: '2024-02-19'
-})
+const centersStore = useCentersStore()
 
 const isLoading = ref(false)
-
-const characteristicIcons: Record<string, string> = {
-  accesibilidad: '♿',
-  wifi: '📶',
-  comida: '🍽️',
-  duchase: '🚿',
-  camas: '🛏️',
-  medico: '⚕️',
-  psicologia: '💭',
-  legal: '⚖️',
-  educacion: '📚',
-  cuidado_ninos: '👶',
-  actividades: '🎯',
-  transporte: '🚌'
-}
+const centerData = ref<Center | null>(null)
+const notFound = ref(false)
 
 const characteristicNames: Record<string, string> = {
   accesibilidad: 'Accesibilidad',
@@ -55,18 +35,7 @@ const characteristicNames: Record<string, string> = {
   educacion: 'Educación',
   cuidado_ninos: 'Cuidado de Niños',
   actividades: 'Actividades',
-  transporte: 'Transporte'
-}
-
-const socialIcons: Record<string, string> = {
-  instagram: '📷',
-  x: '𝕏',
-  facebook: '👍',
-  tiktok: '♪',
-  linkedin: '💼',
-  youtube: '▶️',
-  whatsapp: '💬',
-  telegram: '✈️'
+  transporte: 'Transporte',
 }
 
 const socialNames: Record<string, string> = {
@@ -77,545 +46,247 @@ const socialNames: Record<string, string> = {
   linkedin: 'LinkedIn',
   youtube: 'YouTube',
   whatsapp: 'WhatsApp',
-  telegram: 'Telegram'
+  telegram: 'Telegram',
 }
 
 const handleBackClick = () => {
-  router.push('/GestionPanel')
+  router.push({ name: 'GestionPanel' })
 }
 
-const getCharacteristicIcon = (id: string) => characteristicIcons[id] || '⭐'
+const handleEditClick = () => {
+  router.push({ name: 'EditCenter', params: { id: route.params.id } })
+}
+
 const getCharacteristicName = (id: string) => characteristicNames[id] || id
-const getSocialIcon = (id: string) => socialIcons[id] || '🔗'
 const getSocialName = (id: string) => socialNames[id] || id
 
+const phoneList = computed(() => centerData.value?.phones?.map(p => p.phone) ?? [])
+
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
 onMounted(async () => {
-  isLoading.value = true
-  try {
-    // TODO: Fetch center data from API using route.params.id
-    // const { data } = await fetch(`/api/centers/${route.params.id}`)
-    // centerData.value = data
-  } catch (error) {
-    console.error('Error loading center data:', error)
-  } finally {
+  const id = Number(route.params.id)
+  if (!id) { notFound.value = true; return }
+
+  const cached = centersStore.getCenterById(id)
+  if (cached) {
+    centerData.value = cached
+  } else {
+    isLoading.value = true
+    const fetched = await centersStore.fetchById(id)
     isLoading.value = false
+    if (!fetched) {
+      notFound.value = true
+      return
+    }
+    centerData.value = fetched
   }
 })
 </script>
 
 <template>
-  <div class="info-center-outer-wrapper">
-    <div class="info-center-container">
-      <!-- Header -->
-      <div class="header">
-        <div class="header-content">
-          <button class="back-button" @click="handleBackClick">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            Volver a Gestión de Centros
+  <div class="p-6 md:p-8 max-w-5xl mx-auto">
+
+    <!-- Back Navigation -->
+    <button
+      class="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors mb-6"
+      @click="handleBackClick"
+    >
+      <ArrowLeft class="w-4 h-4" />
+      Volver a Centros
+    </button>
+
+    <!-- Not Found -->
+    <div v-if="notFound" class="flex flex-col items-center justify-center py-20 text-ink-muted">
+      <p class="text-lg font-medium">Centro no encontrado.</p>
+    </div>
+
+    <!-- Loading State -->
+    <div v-else-if="isLoading" class="flex flex-col items-center justify-center py-20 gap-4 text-ink-muted">
+      <div class="w-9 h-9 rounded-full border-4 border-line border-t-brand-500 animate-spin"></div>
+      <p class="text-sm">Cargando información del centro...</p>
+    </div>
+
+    <!-- Center Detail -->
+    <div v-else-if="centerData" class="flex flex-col gap-4">
+
+      <!-- Page Header Card -->
+      <div class="bg-white rounded-card shadow-card border border-slate-100 p-5">
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div class="flex flex-col gap-2">
+            <h1 class="text-2xl font-bold text-ink leading-tight">{{ centerData.name }}</h1>
+            <span
+              v-if="centerData.center_type"
+              class="inline-flex self-start bg-brand-100 text-brand-700 text-xs font-semibold px-2.5 py-0.5 rounded-full"
+            >
+              {{ centerData.center_type.name }}
+            </span>
+          </div>
+          <button
+            class="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-btn transition-colors flex-shrink-0"
+            @click="handleEditClick"
+          >
+            <Pencil class="w-4 h-4" />
+            Editar
           </button>
         </div>
       </div>
 
-      <!-- Main Content -->
-      <div class="content-wrapper">
-        <div v-if="!isLoading" class="center-details">
-          <!-- Header Section -->
-          <section class="info-section header-section">
-            <div class="center-header">
-              <h1 class="center-title">{{ centerData.name }}</h1>
-              <span class="center-type">{{ centerData.type }}</span>
-            </div>
-            <p class="center-description">{{ centerData.description }}</p>
-          </section>
+      <!-- Description -->
+      <div class="bg-white rounded-card shadow-card border border-slate-100 p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <Info class="w-5 h-5 text-brand-500 flex-shrink-0" />
+          <h2 class="text-base font-semibold text-ink">Descripción</h2>
+        </div>
+        <p v-if="centerData.description" class="text-sm text-ink-muted leading-relaxed">
+          {{ centerData.description }}
+        </p>
+        <p v-else class="text-sm text-slate-400 italic">Sin descripción registrada.</p>
+      </div>
 
-          <!-- Location Section -->
-          <section class="info-section">
-            <div class="section-header">
-              <h2 class="section-title">📍 Ubicación</h2>
+      <!-- Address -->
+      <div class="bg-white rounded-card shadow-card border border-slate-100 p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <MapPin class="w-5 h-5 text-brand-500 flex-shrink-0" />
+          <h2 class="text-base font-semibold text-ink">Dirección</h2>
+        </div>
+        <template v-if="centerData.address">
+          <div class="flex flex-col gap-3">
+            <div v-if="centerData.address.formatted_address" class="flex flex-col gap-0.5">
+              <span class="text-xs font-semibold text-ink-muted uppercase tracking-wide">Dirección completa</span>
+              <span class="text-sm text-ink font-medium">{{ centerData.address.formatted_address }}</span>
             </div>
-            <div class="section-content">
-              <div class="info-item">
-                <span class="info-label">Dirección</span>
-                <span class="info-value">{{ centerData.street }}</span>
-              </div>
-              <div class="info-row">
-                <div class="info-item">
-                  <span class="info-label">Código Postal</span>
-                  <span class="info-value">{{ centerData.postalCode }}</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Ciudad</span>
-                  <span class="info-value">{{ centerData.city }}</span>
-                </div>
-              </div>
+            <div v-if="centerData.address.city" class="flex flex-col gap-0.5">
+              <span class="text-xs font-semibold text-ink-muted uppercase tracking-wide">Ciudad</span>
+              <span class="text-sm text-ink font-medium">{{ centerData.address.city }}</span>
             </div>
-          </section>
+            <div v-if="centerData.address.postal_code" class="flex flex-col gap-0.5">
+              <span class="text-xs font-semibold text-ink-muted uppercase tracking-wide">Código Postal</span>
+              <span class="text-sm text-ink font-medium">{{ centerData.address.postal_code }}</span>
+            </div>
+          </div>
+          <p v-if="!centerData.address.formatted_address && !centerData.address.city && !centerData.address.postal_code" class="text-sm text-slate-400 italic">
+            Sin dirección registrada.
+          </p>
+        </template>
+        <p v-else class="text-sm text-slate-400 italic">Sin dirección registrada.</p>
+      </div>
 
-          <!-- Contact Section -->
-          <section class="info-section">
-            <div class="section-header">
-              <h2 class="section-title">📞 Contacto</h2>
-            </div>
-            <div class="section-content">
-              <!-- Phones -->
-              <div v-if="centerData.phones.length > 0" class="contact-group">
-                <span class="contact-label">Teléfonos</span>
-                <div class="contact-list">
-                  <a
-                    v-for="(phone, index) in centerData.phones"
-                    :key="index"
-                    :href="`tel:${phone}`"
-                    class="contact-item phone-item"
-                  >
-                    <span class="contact-icon">☎️</span>
-                    <span>{{ phone }}</span>
-                  </a>
-                </div>
-              </div>
+      <!-- Phones -->
+      <div class="bg-white rounded-card shadow-card border border-slate-100 p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <Phone class="w-5 h-5 text-brand-500 flex-shrink-0" />
+          <h2 class="text-base font-semibold text-ink">Teléfonos</h2>
+        </div>
+        <div v-if="phoneList.length > 0" class="flex flex-col gap-2">
+          <a
+            v-for="(phone, index) in phoneList"
+            :key="index"
+            :href="`tel:${phone}`"
+            class="flex items-center gap-3 px-3 py-2 bg-surface-muted rounded-lg text-sm text-ink hover:bg-brand-50 hover:text-brand-700 transition-colors"
+          >
+            <Phone class="w-4 h-4 text-ink-faint flex-shrink-0" />
+            {{ phone }}
+          </a>
+        </div>
+        <p v-else class="text-sm text-slate-400 italic">Sin teléfonos registrados.</p>
+      </div>
 
-              <!-- Emails -->
-              <div v-if="centerData.emails.length > 0" class="contact-group">
-                <span class="contact-label">Correos Electrónicos</span>
-                <div class="contact-list">
-                  <a
-                    v-for="(email, index) in centerData.emails"
-                    :key="index"
-                    :href="`mailto:${email}`"
-                    class="contact-item email-item"
-                  >
-                    <span class="contact-icon">📧</span>
-                    <span>{{ email }}</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </section>
+      <!-- Email / Web -->
+      <div class="bg-white rounded-card shadow-card border border-slate-100 p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <Globe class="w-5 h-5 text-brand-500 flex-shrink-0" />
+          <h2 class="text-base font-semibold text-ink">Email / Web</h2>
+        </div>
+        <div class="flex flex-col gap-2">
+          <a
+            v-if="centerData.email"
+            :href="`mailto:${centerData.email}`"
+            class="flex items-center gap-3 px-3 py-2 bg-surface-muted rounded-lg text-sm text-ink hover:bg-brand-50 hover:text-brand-700 transition-colors"
+          >
+            <Mail class="w-4 h-4 text-ink-faint flex-shrink-0" />
+            {{ centerData.email }}
+          </a>
+          <a
+            v-if="centerData.website"
+            :href="centerData.website"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-3 px-3 py-2 bg-surface-muted rounded-lg text-sm text-ink hover:bg-brand-50 hover:text-brand-700 transition-colors"
+          >
+            <Globe class="w-4 h-4 text-ink-faint flex-shrink-0" />
+            {{ centerData.website }}
+          </a>
+          <p v-if="!centerData.email && !centerData.website" class="text-sm text-slate-400 italic">
+            Sin correo ni web registrados.
+          </p>
+        </div>
+      </div>
 
-          <!-- Characteristics Section -->
-          <section v-if="centerData.characteristics.length > 0" class="info-section">
-            <div class="section-header">
-              <h2 class="section-title">⭐ Características</h2>
-            </div>
-            <div class="section-content">
-              <div class="characteristics-display">
-                <div
-                  v-for="charId in centerData.characteristics"
-                  :key="charId"
-                  class="characteristic-badge"
-                >
-                  <span class="badge-icon">{{ getCharacteristicIcon(charId) }}</span>
-                  <span class="badge-name">{{ getCharacteristicName(charId) }}</span>
-                </div>
-              </div>
-            </div>
-          </section>
+      <!-- Characteristics -->
+      <div class="bg-white rounded-card shadow-card border border-slate-100 p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <Tag class="w-5 h-5 text-brand-500 flex-shrink-0" />
+          <h2 class="text-base font-semibold text-ink">Características</h2>
+        </div>
+        <div v-if="centerData.characteristics && centerData.characteristics.length > 0" class="flex flex-wrap gap-2">
+          <span
+            v-for="charId in centerData.characteristics"
+            :key="charId"
+            class="inline-flex items-center gap-1.5 bg-brand-50 text-brand-700 border border-brand-200 rounded-full px-3 py-0.5 text-sm font-medium"
+          >
+            {{ getCharacteristicName(charId) }}
+          </span>
+        </div>
+        <p v-else class="text-sm text-slate-400 italic">Sin características registradas.</p>
+      </div>
 
-          <!-- Social Media Section -->
-          <section v-if="Object.keys(centerData.social).length > 0" class="info-section">
-            <div class="section-header">
-              <h2 class="section-title">🌐 Redes Sociales</h2>
-            </div>
-            <div class="section-content">
-              <div class="social-display">
-                <a
-                  v-for="(handle, platform) in centerData.social"
-                  :key="platform"
-                  :href="buildSocialUrl(platform, handle)"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="social-link"
-                  :title="getSocialName(platform)"
-                >
-                  <span class="social-icon">{{ getSocialIcon(platform) }}</span>
-                  <span class="social-platform">{{ getSocialName(platform) }}</span>
-                </a>
-              </div>
-            </div>
-          </section>
+      <!-- Social Media -->
+      <div
+        v-if="centerData.social && Object.keys(centerData.social).length > 0"
+        class="bg-white rounded-card shadow-card border border-slate-100 p-5"
+      >
+        <div class="flex items-center gap-2 mb-3">
+          <Share2 class="w-5 h-5 text-brand-500 flex-shrink-0" />
+          <h2 class="text-base font-semibold text-ink">Redes Sociales</h2>
+        </div>
+        <div class="flex flex-col gap-2">
+          <a
+            v-for="(url, platform) in centerData.social"
+            :key="platform"
+            :href="url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-3 px-3 py-2 bg-surface-muted rounded-lg text-sm text-ink hover:bg-brand-50 hover:text-brand-700 transition-colors"
+          >
+            <Globe class="w-4 h-4 text-ink-faint flex-shrink-0" />
+            <span class="font-medium">{{ getSocialName(String(platform)) }}</span>
+            <span class="text-ink-muted truncate">{{ url }}</span>
+          </a>
+        </div>
+      </div>
 
-          <!-- Metadata Section -->
-          <section class="info-section metadata-section">
-            <div class="metadata-items">
-              <div class="metadata-item">
-                <span class="metadata-label">Creado</span>
-                <span class="metadata-value">{{ formatDate(centerData.createdAt) }}</span>
-              </div>
-              <div class="metadata-item">
-                <span class="metadata-label">Actualizado</span>
-                <span class="metadata-value">{{ formatDate(centerData.updatedAt) }}</span>
-              </div>
-            </div>
-          </section>
-
-          <!-- Action Buttons -->
-          <div class="action-buttons">
-            <button class="btn btn-secondary" @click="handleBackClick">
-              Volver
-            </button>
-            <button class="btn btn-primary">
-              Editar Centro
-            </button>
+      <!-- Metadata -->
+      <div class="bg-white rounded-card shadow-card border border-slate-100 p-5">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-0.5">
+            <span class="text-xs font-semibold text-ink-muted uppercase tracking-wide">Creado</span>
+            <span class="text-sm text-ink font-medium">{{ formatDate(centerData.created_at) }}</span>
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-xs font-semibold text-ink-muted uppercase tracking-wide">Actualizado</span>
+            <span class="text-sm text-ink font-medium">{{ formatDate(centerData.updated_at) }}</span>
           </div>
         </div>
-
-        <!-- Loading State -->
-        <div v-else class="loading-state">
-          <div class="spinner"></div>
-          <p>Cargando información del centro...</p>
-        </div>
       </div>
 
-      <!-- Footer -->
-      <div class="footer">
-        <p class="footer-text">© 2024 Gestión Solidaria. Sistema de Registro Humanitario.</p>
-      </div>
     </div>
   </div>
 </template>
-
-<script lang="ts">
-function buildSocialUrl(platform: string, handle: string): string {
-  const urls: Record<string, (h: string) => string> = {
-    instagram: (h) => `https://instagram.com/${h.replace('@', '')}`,
-    facebook: (h) => `https://facebook.com/${h}`,
-    x: (h) => `https://x.com/${h.replace('@', '')}`,
-    tiktok: (h) => `https://tiktok.com/@${h.replace('@', '')}`,
-    linkedin: (h) => h.startsWith('http') ? h : `https://linkedin.com/in/${h}`,
-    youtube: (h) => h.startsWith('http') ? h : `https://youtube.com/@${h}`,
-    whatsapp: (h) => `https://wa.me/${h.replace(/\D/g, '')}`,
-    telegram: (h) => `https://t.me/${h.replace('@', '')}`
-  }
-  
-  return urls[platform] ? urls[platform](handle) : handle
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
-</script>
-
-<style lang="scss" scoped>
-@import '@/assets/styles/global.css';
-
-.center-details {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.header-section {
-  background: linear-gradient(135deg, var(--primary-lightest) 0%, #dbeafe 100%);
-  border: 2px solid var(--primary-light);
-}
-
-.center-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.center-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--neutral-darkest);
-  margin: 0;
-}
-
-.center-type {
-  background: var(--primary);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.center-description {
-  color: var(--neutral);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.info-section {
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  overflow: hidden;
-}
-
-.section-header {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  padding: 1.25rem 1.5rem;
-  border-bottom: 2px solid #f1f5f9;
-}
-
-.section-title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--neutral-darkest);
-  margin: 0;
-}
-
-.section-content {
-  padding: 1.5rem;
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.info-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--neutral-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.info-value {
-  font-size: 0.95rem;
-  color: var(--neutral-darkest);
-  font-weight: 500;
-}
-
-.info-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
-.contact-group {
-  margin-bottom: 1.5rem;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.contact-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--neutral-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: block;
-  margin-bottom: 0.75rem;
-}
-
-.contact-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.contact-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background-color: #f8fafc;
-  border-radius: 6px;
-  text-decoration: none;
-  color: var(--neutral-darkest);
-  transition: all 0.2s;
-  font-size: 0.9rem;
-}
-
-.contact-item:hover {
-  background-color: #f1f5f9;
-  transform: translateX(4px);
-}
-
-.contact-item.phone-item:hover {
-  color: var(--primary);
-}
-
-.contact-item.email-item:hover {
-  color: var(--secondary);
-}
-
-.contact-icon {
-  font-size: 1.125rem;
-  flex-shrink: 0;
-}
-
-.characteristics-display {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
-}
-
-.characteristic-badge {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem;
-  background: linear-gradient(135deg, var(--primary-lightest) 0%, #eff6ff 100%);
-  border: 2px solid var(--primary-light);
-  border-radius: 8px;
-  text-align: center;
-  transition: all 0.2s;
-}
-
-.characteristic-badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-}
-
-.badge-icon {
-  font-size: 1.75rem;
-}
-
-.badge-name {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--neutral-darkest);
-}
-
-.social-display {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 1rem;
-}
-
-.social-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.25rem 1rem;
-  background-color: #f8fafc;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  text-decoration: none;
-  color: var(--neutral-darkest);
-  transition: all 0.2s;
-}
-
-.social-link:hover {
-  border-color: var(--primary);
-  background-color: var(--primary-lightest);
-  transform: translateY(-2px);
-}
-
-.social-icon {
-  font-size: 1.75rem;
-}
-
-.social-platform {
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-align: center;
-}
-
-.metadata-section {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid #e5e7eb;
-}
-
-.metadata-items {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-
-.metadata-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.metadata-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--neutral-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.metadata-value {
-  font-size: 0.9rem;
-  color: var(--neutral-darkest);
-}
-
-.action-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 1rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
-  text-align: center;
-  color: var(--neutral);
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #e5e7eb;
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 768px) {
-  .center-title {
-    font-size: 1.5rem;
-  }
-
-  .center-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .info-row {
-    grid-template-columns: 1fr;
-  }
-
-  .characteristics-display {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  }
-
-  .social-display {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  }
-
-  .action-buttons {
-    flex-direction: column;
-  }
-
-  .btn {
-    width: 100%;
-  }
-}
-</style>

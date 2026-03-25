@@ -1,109 +1,33 @@
 <script setup lang="ts">
 import LoginForm from "@/features/Auth/components/loginForm.vue";
 </script>
+
 <template>
-<div class="loginContainer">
-  <div class="left">
-    <div class="left-content">
-      <div class="logo-section">
-        <div class="logo-icon">XD</div>
-        <h1 class="logo-text">BlosteSoftware</h1>
+  <div class="flex h-screen w-full">
+    <!-- Left panel: brand identity -->
+    <div class="flex-1 bg-brand-500 flex flex-col items-center justify-center p-12 text-white relative overflow-hidden">
+      <!-- Decorative geometric background shapes -->
+      <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/5"></div>
+        <div class="absolute -bottom-32 -right-16 w-80 h-80 rounded-full bg-white/5"></div>
+        <div class="absolute top-1/2 -translate-y-1/2 -left-8 w-48 h-48 rounded-full bg-white/[0.04]"></div>
+        <div class="absolute top-8 right-8 w-32 h-32 bg-white/[0.04] rotate-45"></div>
+        <div class="absolute bottom-16 left-12 w-16 h-16 bg-white/[0.06] rotate-12"></div>
       </div>
-      <h2 class="tagline"> Robusto como un poste </h2>
+
+      <!-- Content -->
+      <div class="relative z-10 flex flex-col items-center text-center max-w-xs">
+        <h1 class="text-5xl font-bold tracking-tight mb-2">Remmy</h1>
+        <p class="text-xl font-medium text-white/90 mb-6">Gestión Humanitaria</p>
+        <p class="text-white/70 text-sm leading-relaxed">
+          Administra la red de centros de ayuda humanitaria de España de forma simple y eficiente.
+        </p>
+      </div>
+    </div>
+
+    <!-- Right panel: login form -->
+    <div class="flex-1 bg-surface flex items-center justify-center p-12 sm:p-16">
+      <LoginForm />
     </div>
   </div>
-  <div class="right">
-    <LoginForm/>
-  </div>
-</div>
 </template>
-<style>
-
-.loginContainer {
-  display: flex;
-  height: calc(100vh - 64px);
-  width: 100vw;                    
-  background-color: #f3f4f6;
-  margin-left: calc(-50vw + 50%);  
-}
-
-
-.left {
-  flex: 1;
-  background: linear-gradient(135deg, #4a9b8e 0%, #2d7a6e 50%, #1e5a54 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  color: white;
-}
-
-.left-content {
-  max-width: 450px;
-}
-
-.logo-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.logo-icon {
-  font-size: 2.5rem;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-}
-
-.logo-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-.tagline {
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1.3;
-  margin-bottom: 1.5rem;
-}
-
-.description {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  opacity: 0.9;
-}
-
-.right {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  background-color: #ffffff;
-}
-
-@media (max-width: 768px) {
-  .loginContainer {
-    flex-direction: column;
-  }
-  
-  .left {
-    height: 40%;
-    border-radius: 0 0 16px 16px;
-  }
-  
-  .right {
-    height: 60%;
-  }
-  
-  .tagline {
-    font-size: 1.5rem;
-  }
-}
-</style>

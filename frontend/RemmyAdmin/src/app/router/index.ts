@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/features/Auth/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,11 +9,6 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/features/Auth/views/loginView.vue'),
-    },
-    {
-      path: '/Register',
-      name: 'Register',
-      component: () => import('@/features/Auth/views/registerView.vue'),
     },
 
     // SideBar
@@ -34,10 +30,24 @@ const router = createRouter({
           path: 'center/:id',
           name: 'InfoCenter',
           component: () => import('@/features/Centers/views/infoCenterView.vue'),
+        },
+        {
+          path: 'centers/:id/edit',
+          name: 'EditCenter',
+          component: () => import('@/features/Centers/views/NewCenterView.vue'),
         }
       ]
     },
   ],
+})
+
+router.beforeEach(async (to) => {
+  const authStore = useAuthStore()
+  await authStore.sessionReady
+
+  const isProtected = to.matched.some(r => r.path === '/')
+  if (isProtected && !authStore.user) return { name: 'login' }
+  if (to.name === 'login' && authStore.user) return { name: 'GestionPanel' }
 })
 
 export default router

@@ -1,6 +1,20 @@
 <script setup lang="ts">
-import { faListCheck} from '@fortawesome/free-solid-svg-icons'
-import { ref } from 'vue'
+import {
+  Accessibility,
+  Wifi,
+  UtensilsCrossed,
+  Droplets,
+  Bed,
+  Stethoscope,
+  Brain,
+  Scale,
+  BookOpen,
+  Baby,
+  Dumbbell,
+  Bus,
+  ListChecks,
+} from 'lucide-vue-next'
+import type { Component } from 'vue'
 
 const props = defineProps({
   form: {
@@ -9,19 +23,19 @@ const props = defineProps({
   }
 })
 
-const characteristics = [
-  { id: 'accesibilidad', name: 'Accesibilidad', icon: '♿' },
-  { id: 'wifi', name: 'Wi-Fi Gratis', icon: '📶' },
-  { id: 'comida', name: 'Comida', icon: '🍽️' },
-  { id: 'duchase', name: 'Duchas', icon: '🚿' },
-  { id: 'camas', name: 'Camas', icon: '🛏️' },
-  { id: 'medico', name: 'Asistencia Médica', icon: '⚕️' },
-  { id: 'psicologia', name: 'Apoyo Psicológico', icon: '💭' },
-  { id: 'legal', name: 'Asesoría Legal', icon: '⚖️' },
-  { id: 'educacion', name: 'Educación', icon: '📚' },
-  { id: 'cuidado_ninos', name: 'Cuidado de Niños', icon: '👶' },
-  { id: 'actividades', name: 'Actividades', icon: '🎯' },
-  { id: 'transporte', name: 'Transporte', icon: '🚌' },
+const characteristics: { id: string; name: string; icon: Component }[] = [
+  { id: 'accesibilidad', name: 'Accesibilidad', icon: Accessibility },
+  { id: 'wifi', name: 'Wi-Fi Gratis', icon: Wifi },
+  { id: 'comida', name: 'Comida', icon: UtensilsCrossed },
+  { id: 'duchase', name: 'Duchas', icon: Droplets },
+  { id: 'camas', name: 'Camas', icon: Bed },
+  { id: 'medico', name: 'Asistencia Médica', icon: Stethoscope },
+  { id: 'psicologia', name: 'Apoyo Psicológico', icon: Brain },
+  { id: 'legal', name: 'Asesoría Legal', icon: Scale },
+  { id: 'educacion', name: 'Educación', icon: BookOpen },
+  { id: 'cuidado_ninos', name: 'Cuidado de Niños', icon: Baby },
+  { id: 'actividades', name: 'Actividades', icon: Dumbbell },
+  { id: 'transporte', name: 'Transporte', icon: Bus },
 ]
 
 // Initialize characteristics array if doesn't exist
@@ -45,58 +59,62 @@ const isSelected = (characteristicId: string) => {
 const getCharacteristicName = (id: string) => {
   return characteristics.find(c => c.id === id)?.name || id
 }
+
+const getCharacteristicIcon = (id: string): Component | null => {
+  return characteristics.find(c => c.id === id)?.icon ?? null
+}
 </script>
 
 <template>
-  <section class="form-section">
-    <div class="section-header">
-      <div class="section-icon"><font-awesome-icon :icon="faListCheck" /></div>
-      <h2 class="section-title">Características del Centro</h2>
+  <section class="bg-white rounded-card shadow-card border border-slate-100">
+    <div class="px-6 py-4 border-b border-line bg-surface-muted flex items-center gap-2">
+      <ListChecks class="w-5 h-5 text-brand-500" />
+      <h2 class="text-base font-semibold text-ink">Características del Centro</h2>
     </div>
 
-    <div class="section-content">
-      <p class="characteristics-description">Selecciona las características y servicios que ofrece tu centro</p>
-      
+    <div class="p-6">
+      <p class="text-sm text-ink-muted mb-5">Selecciona las características y servicios que ofrece el centro.</p>
+
       <!-- Characteristics Grid -->
-      <div class="characteristics-grid">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-5">
         <button
           v-for="char in characteristics"
           :key="char.id"
           type="button"
-          class="characteristic-button"
-          :class="{ 'characteristic-button--selected': isSelected(char.id) }"
+          class="flex flex-col items-center gap-2 p-4 border-2 rounded-lg cursor-pointer select-none transition-all text-center"
+          :class="isSelected(char.id)
+            ? 'border-brand-500 bg-brand-50 shadow-[0_0_0_3px_theme(colors.brand.100)]'
+            : 'border-line bg-surface hover:border-brand-300 hover:bg-brand-50'"
           @click="toggleCharacteristic(char.id)"
         >
-          <span class="characteristic-icon">{{ char.icon }}</span>
-          <span class="characteristic-name">{{ char.name }}</span>
+          <component :is="char.icon" class="w-6 h-6" :class="isSelected(char.id) ? 'text-brand-600' : 'text-ink-muted'" />
+          <span class="text-xs font-medium leading-tight" :class="isSelected(char.id) ? 'text-brand-700' : 'text-ink-muted'">
+            {{ char.name }}
+          </span>
         </button>
       </div>
 
       <!-- Selected Characteristics Summary -->
-      <div v-if="form.characteristics.length > 0" class="characteristics-summary">
-        <div class="characteristics-summary-header">
-          <span class="characteristics-count">{{ form.characteristics.length }} característica{{ form.characteristics.length !== 1 ? 's' : '' }} seleccionada{{ form.characteristics.length !== 1 ? 's' : '' }}</span>
-        </div>
-        <div class="characteristics-tags">
-          <div
+      <div v-if="form.characteristics.length > 0" class="pt-4 border-t border-line">
+        <p class="text-xs font-semibold text-ink-muted uppercase tracking-wide mb-3">
+          {{ form.characteristics.length }} característica{{ form.characteristics.length !== 1 ? 's' : '' }} seleccionada{{ form.characteristics.length !== 1 ? 's' : '' }}
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span
             v-for="charId in form.characteristics"
             :key="charId"
-            class="characteristic-tag"
+            class="inline-flex items-center gap-1.5 bg-brand-50 text-brand-700 border border-brand-200 rounded-full px-3 py-0.5 text-sm"
           >
-            <span class="tag-icon">{{ characteristics.find(c => c.id === charId)?.icon }}</span>
-            <span class="tag-name">{{ getCharacteristicName(charId) }}</span>
-          </div>
+            <component :is="getCharacteristicIcon(charId)" class="w-3.5 h-3.5" />
+            {{ getCharacteristicName(charId) }}
+          </span>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div v-else class="characteristics-empty">
-        <p>Selecciona las características que ofrece tu centro</p>
+      <div v-else class="text-center py-6 bg-surface-muted rounded-lg">
+        <p class="text-sm text-ink-muted">Selecciona las características que ofrece el centro</p>
       </div>
     </div>
   </section>
 </template>
-
-<style lang="scss" scoped>
-@import '@/assets/styles/form.css';
-</style>

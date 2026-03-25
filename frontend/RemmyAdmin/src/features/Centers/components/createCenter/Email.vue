@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faEnvelope } from '@fortawesome/free-solid-svg-icons'
 import { ref } from 'vue'
+import { Mail, X, AlertCircle, Plus } from 'lucide-vue-next'
 
 const props = defineProps({
   form: {
@@ -25,14 +24,14 @@ const validateEmail = (email: string): boolean => {
 
 const addEmail = () => {
   const email = newEmail.value.trim()
-  
+
   if (!email) {
-    emailError.value = 'Por favor ingresa un correo electrónico'
+    emailError.value = 'Por favor, introduce un correo electrónico'
     return
   }
 
   if (!validateEmail(email)) {
-    emailError.value = 'Por favor ingresa un correo válido'
+    emailError.value = 'Por favor, introduce un correo válido'
     return
   }
 
@@ -59,72 +58,68 @@ const handleKeyPress = (event: KeyboardEvent) => {
 </script>
 
 <template>
-  <section class="form-section">
-    <div class="section-header">
-      <div class="section-icon"><font-awesome-icon :icon="faEnvelope" /></div>
-      <h2 class="section-title">Correos Electrónicos</h2>
+  <section class="bg-white rounded-card shadow-card border border-slate-100">
+    <div class="px-6 py-4 border-b border-line bg-surface-muted flex items-center gap-2">
+      <Mail class="w-5 h-5 text-brand-500" />
+      <h2 class="text-base font-semibold text-ink">Correos Electrónicos</h2>
     </div>
 
-    <div class="section-content">
-      <p class="email-description">Añade todos los correos electrónicos de contacto de tu centro</p>
-      
-      <!-- Email Input Section -->
-      <div class="email-input-section">
-        <div class="email-input-group">
+    <div class="p-6">
+      <p class="text-sm text-ink-muted mb-4">Añade todos los correos electrónicos de contacto del centro.</p>
+
+      <!-- Email Input -->
+      <div class="mb-5">
+        <div class="flex gap-2">
           <input
             v-model.trim="newEmail"
             type="email"
             placeholder="ejemplo@correo.com"
-            class="form-input email-input"
+            class="flex-1 border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-colors"
             @keypress="handleKeyPress"
           />
           <button
             type="button"
-            class="btn-add-email"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-brand-200 whitespace-nowrap"
             @click="addEmail"
           >
-            <span class="btn-plus">+</span>
+            <Plus class="w-4 h-4" />
             Añadir
           </button>
         </div>
-        <div v-if="emailError" class="email-error">{{ emailError }}</div>
+        <div v-if="emailError" class="flex items-center gap-1.5 mt-2 text-sm text-red-600">
+          <AlertCircle class="w-4 h-4 flex-shrink-0" />
+          {{ emailError }}
+        </div>
       </div>
 
       <!-- Email List -->
-      <div v-if="form.email.length > 0" class="email-list">
-        <div class="email-list-header">
-          <span class="email-count">{{ form.email.length }} correo{{ form.email.length !== 1 ? 's' : '' }}</span>
-        </div>
-        <div class="email-items">
-          <div
+      <div v-if="form.email.length > 0">
+        <p class="text-xs font-semibold text-ink-muted uppercase tracking-wide mb-3">
+          {{ form.email.length }} correo{{ form.email.length !== 1 ? 's' : '' }}
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span
             v-for="(email, index) in form.email"
             :key="index"
-            class="email-item"
+            class="inline-flex items-center gap-1 bg-brand-50 text-brand-700 border border-brand-200 rounded-full px-3 py-0.5 text-sm"
           >
-            <div class="email-item-content">
-              <span class="email-icon">📧</span>
-              <span class="email-text">{{ email }}</span>
-            </div>
+            {{ email }}
             <button
               type="button"
-              class="remove-email-btn"
+              class="ml-0.5 hover:text-brand-900 transition-colors"
               @click="removeEmail(index)"
               title="Eliminar"
             >
-              ✕
+              <X class="w-3.5 h-3.5" />
             </button>
-          </div>
+          </span>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div v-else class="email-empty">
-        <p>Aún no has añadido ningún correo electrónico</p>
+      <div v-else class="text-center py-6 bg-surface-muted rounded-lg">
+        <p class="text-sm text-ink-muted">Aún no se ha añadido ningún correo electrónico</p>
       </div>
     </div>
   </section>
 </template>
-
-<style lang="scss" scoped>
-@import '@/assets/styles/form.css';
-</style>

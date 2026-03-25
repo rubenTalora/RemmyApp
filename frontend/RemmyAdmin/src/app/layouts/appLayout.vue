@@ -3,30 +3,16 @@ import Sidebar from '@/shared/sideBar/components/sideBar.vue'
 </script>
 
 <template>
-  <div class="app-layout">
+  <div class="flex h-screen w-full">
     <Sidebar />
-    <div class="app-main">
+    <div class="app-main flex-1 overflow-y-auto overflow-x-hidden bg-surface-alt min-w-0">
       <router-view />
     </div>
   </div>
 </template>
 
 <style scoped>
-.app-layout {
-  display: flex;
-  height: 100vh;
-  width: 100%;
-}
-
-.app-main {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background-color: #f8fafc;
-  min-width: 0;
-}
-
-/* Custom scrollbar */
+/* Custom scrollbar — Tailwind cannot generate these */
 .app-main::-webkit-scrollbar {
   width: 8px;
 }
@@ -42,15 +28,5 @@ import Sidebar from '@/shared/sideBar/components/sideBar.vue'
 
 .app-main::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
-}
-
-@media (max-width: 768px) {
-  .app-layout {
-    flex-direction: column;
-  }
-
-  .app-main {
-    flex: 1;
-  }
 }
 </style>

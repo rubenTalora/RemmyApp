@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons'
+import { onMounted } from 'vue'
+import { Info } from 'lucide-vue-next'
+import { useCenterTypesStore } from '@/features/Centers/stores/centerTypes'
 
 defineProps({
   form: {
@@ -9,65 +10,68 @@ defineProps({
   }
 })
 
-const centerTypes = [
-  { id: 1, name: 'Albergue Temporal' },
-  { id: 2, name: 'Comedor Social' },
-  { id: 3, name: 'Centro Médico' },
-  { id: 4, name: 'Centro Educativo' },
-  { id: 5, name: 'Centro de Atención Infantil' },
-]
+const centerTypesStore = useCenterTypesStore()
+
+onMounted(() => {
+  if (centerTypesStore.centerTypes.length === 0) {
+    centerTypesStore.fetchCenterTypes()
+  }
+})
 </script>
 
 <template>
-  <section class="form-section">
-    <div class="section-header">
-      <div class="section-icon"><FontAwesomeIcon :icon="faInfoCircle" /></div>
-      <h2 class="section-title">Información General</h2>
+  <section class="bg-white rounded-card shadow-card border border-slate-100">
+    <div class="px-6 py-4 border-b border-line bg-surface-muted flex items-center gap-2">
+      <Info class="w-5 h-5 text-brand-500" />
+      <h2 class="text-base font-semibold text-ink">Información General</h2>
     </div>
 
-    <div class="section-content">
-      <div class="form-grid">
+    <div class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Center Name -->
-        <div class="form-group">
-          <label for="name" class="form-label">Nombre del Centro</label>
+        <div class="flex flex-col gap-1.5">
+          <label for="name" class="block text-sm font-medium text-slate-700">Nombre del Centro</label>
           <input
             id="name"
             v-model.trim="form.name"
             type="text"
             required
             placeholder="Ej. Comedor Social San José"
-            class="form-input"
+            class="w-full border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-colors"
           />
         </div>
 
         <!-- Center Type -->
-        <div class="form-group">
-          <label for="type" class="form-label">Tipo de Ayuda</label>
-          <select v-model="form.type" id="type" class="form-select" required>
-            <option value="">Seleccione el tipo</option>
-            <option v-for="type in centerTypes" :key="type.id" :value="type.id">
+        <div class="flex flex-col gap-1.5">
+          <label for="id_type" class="block text-sm font-medium text-slate-700">Tipo de Ayuda</label>
+          <select
+            v-model="form.id_type"
+            id="id_type"
+            class="w-full border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-colors appearance-none bg-white"
+          >
+            <option :value="null">Seleccione el tipo</option>
+            <option
+              v-for="type in centerTypesStore.centerTypes"
+              :key="type.id"
+              :value="type.id"
+            >
               {{ type.name }}
             </option>
           </select>
         </div>
 
         <!-- Description (Full Width) -->
-        <div class="form-group form-group--full-width">
-          <label for="desc" class="form-label">Descripción</label>
+        <div class="md:col-span-2 flex flex-col gap-1.5">
+          <label for="desc" class="block text-sm font-medium text-slate-700">Descripción</label>
           <textarea
             id="desc"
             v-model.trim="form.desc"
-            required
             placeholder="Breve descripción de las actividades y servicios ofrecidos..."
-            class="form-textarea"
             rows="4"
+            class="w-full border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-colors resize-none"
           ></textarea>
         </div>
       </div>
     </div>
   </section>
 </template>
-
-<style lang="scss" scoped>
-@import '@/assets/styles/form.css';
-</style>

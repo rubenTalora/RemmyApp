@@ -1,143 +1,86 @@
 <script lang="ts" setup>
+import {
+  LayoutDashboard,
+  Building2,
+  BarChart2,
+  Users,
+  Settings,
+  HelpCircle,
+  LogOut,
+} from 'lucide-vue-next'
 import SidebarItem from './sideBarItem.vue'
+import { useAuthStore } from '@/features/Auth/stores/auth'
+import { useRouter } from 'vue-router'
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+function handleHelp() {
+  console.log('Help clicked')
+}
+
+async function handleSignOut() {
+  await authStore.signOut()
+  router.push('/login')
+}
 </script>
 
 <template>
-  <nav class="sidebar">
-    <div class="sidebar-logo">
-      <router-link to="/" class="logo-link">
-        <span class="logo-icon">📊</span>
-      </router-link>
+  <nav class="flex flex-col w-[220px] h-screen bg-brand-500 border-r border-brand-600 flex-shrink-0">
+
+    <!-- Wordmark -->
+    <div class="flex items-center px-5 py-5 border-b border-brand-600">
+      <span class="text-white font-bold text-xl tracking-tight">Remmy</span>
     </div>
 
-    <div class="sidebar-menu">
-      <SidebarItem 
+    <!-- Main Nav -->
+    <div class="flex-1 flex flex-col gap-1 px-3 py-4 overflow-y-auto">
+      <SidebarItem
         label="Dashboard"
-        icon="📊" 
-        to="/Dashboard" 
+        :icon="LayoutDashboard"
+        to="/Dashboard"
         action="link"
       />
-      <SidebarItem 
+      <SidebarItem
         label="Gestión de Centros"
-        icon="🏢" 
-        to="/GestionPanel" 
+        :icon="Building2"
+        to="/GestionPanel"
         action="link"
       />
-      <SidebarItem 
+      <SidebarItem
         label="Reportes"
-        icon="📈" 
-        to="/Reportes" 
+        :icon="BarChart2"
+        to="/Reportes"
         action="link"
       />
-      <SidebarItem 
+      <SidebarItem
         label="Usuarios"
-        icon="👥" 
-        to="/Usuarios" 
+        :icon="Users"
+        to="/Usuarios"
         action="link"
       />
-      <SidebarItem 
+      <SidebarItem
         label="Configuración"
-        icon="⚙️" 
-        to="/Configuracion" 
+        :icon="Settings"
+        to="/Configuracion"
         action="link"
       />
     </div>
 
-    <div class="sidebar-footer">
-      <SidebarItem 
+    <!-- Footer Nav -->
+    <div class="flex flex-col gap-1 px-3 py-4 border-t border-brand-600">
+      <SidebarItem
         label="Ayuda"
-        icon="❓" 
+        :icon="HelpCircle"
         action="button"
-        @click="handleHelp"
+        :onClick="handleHelp"
+      />
+      <SidebarItem
+        label="Cerrar Sesión"
+        :icon="LogOut"
+        action="button"
+        :onClick="handleSignOut"
       />
     </div>
   </nav>
 </template>
-
-<script lang="ts">
-function handleHelp() {
-  console.log('Help clicked');
-}
-</script>
-
-<style scoped>
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  width: 70px;
-  height: 100vh;
-  background-color: #1e293b;
-  border-right: 1px solid #334155;
-  padding: 0.5rem 0;
-  overflow-y: auto;
-}
-
-.sidebar-logo {
-  display: flex;
-  justify-content: center;
-  padding: 1rem 0;
-  border-bottom: 1px solid #334155;
-  margin-bottom: 0.5rem;
-}
-
-.logo-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  background-color: #3b82f6;
-  text-decoration: none;
-  transition: background-color 0.2s;
-}
-
-.logo-link:hover {
-  background-color: #2563eb;
-}
-
-.logo-icon {
-  font-size: 1.5rem;
-}
-
-.sidebar-menu {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.5rem;
-}
-
-.sidebar-footer {
-  padding-top: 1rem;
-  border-top: 1px solid #334155;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.5rem;
-}
-
-/* Custom scrollbar */
-.sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 3px;
-}
-
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    width: 60px;
-  }
-}
-</style>

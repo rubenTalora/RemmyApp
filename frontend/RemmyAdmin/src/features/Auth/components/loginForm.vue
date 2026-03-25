@@ -1,93 +1,91 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import BaseButton from '@/shared/util/baseButton.vue'
+import { useAuthStore } from '@/features/Auth/stores/auth'
+
+const authStore = useAuthStore()
+const router = useRouter()
+
 const loginForm = ref({
   email: '',
   password: ''
 })
 const rememberDevice = ref(false)
-const handleSubmit = () => {
-  console.log('Login attempt:', loginForm.value)
+
+const handleSubmit = async () => {
+  const success = await authStore.signIn(loginForm.value.email, loginForm.value.password)
+  if (success) router.push({ name: 'GestionPanel' })
 }
 </script>
+
 <template>
-  <div class="login-card">
-    <div class="text-center">
-      <h2 class="login-title">Welcome</h2>
-      <p class="login-subtitle">Please enter your credentials to access the staff portal.</p>
+  <div class="w-full max-w-sm">
+    <!-- Header -->
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold text-ink mb-1">Bienvenido</h2>
+      <p class="text-sm text-ink-muted">Introduce tu correo y contraseña para acceder al panel.</p>
     </div>
 
-    <form @submit.prevent="handleSubmit" class="login-form">
-      <div class="form-group">
-        <label for="email" class="form-label">Email Address</label>
-        <input id="email" v-model.trim="loginForm.email" type="email" autocomplete="email" required
-          placeholder="name@organization.org" class="form-input" />
+    <!-- Form -->
+    <form @submit.prevent="handleSubmit" class="flex flex-col gap-5">
+      <!-- Email -->
+      <div class="flex flex-col gap-1.5">
+        <label for="email" class="text-sm font-medium text-slate-700">Correo electrónico</label>
+        <input
+          id="email"
+          v-model.trim="loginForm.email"
+          type="email"
+          autocomplete="email"
+          required
+          placeholder="nombre@organizacion.org"
+          class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-ink bg-surface placeholder:text-ink-faint focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition"
+        />
       </div>
 
-      <div class="form-group">
-        <div class="label-row">
-          <label for="password" class="form-label">Password</label>
-          <a href="#" class="forgot-password">Forgot Password?</a>
-        </div>
-        <input id="password" v-model="loginForm.password" type="password" autocomplete="current-password" required
-          placeholder="••••••••" class="form-input" />
+      <!-- Password -->
+      <div class="flex flex-col gap-1.5">
+        <label for="password" class="text-sm font-medium text-slate-700">Contraseña</label>
+        <input
+          id="password"
+          v-model="loginForm.password"
+          type="password"
+          autocomplete="current-password"
+          required
+          placeholder="••••••••"
+          class="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-ink bg-surface placeholder:text-ink-faint focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition"
+        />
+        <!-- Error message -->
+        <p v-if="authStore.error" class="text-red-500 text-xs mt-0.5">{{ authStore.error }}</p>
       </div>
 
-      <div class="checkbox-group">
-        <input id="remember" type="checkbox" v-model="rememberDevice" class="checkbox-input" />
-        <label for="remember" class="checkbox-label">Remember this device</label>
+      <!-- Remember device -->
+      <div class="flex items-center gap-2">
+        <input
+          id="remember"
+          type="checkbox"
+          v-model="rememberDevice"
+          class="w-4 h-4 rounded border-slate-300 text-brand-500 focus:ring-brand-500/20 cursor-pointer"
+        />
+        <label for="remember" class="text-sm text-ink-muted cursor-pointer select-none">
+          Recordar dispositivo
+        </label>
       </div>
 
-      <BaseButton variant="primary" label="Log In →" :animationEnabled="false" @click="$router.push('/GestionPanel')" />
-
-      <button class="createAccount" @click="$router.push('/Register')">Create Account</button>
-
+      <!-- Submit -->
+      <BaseButton
+        variant="primary"
+        :label="authStore.loading ? 'Iniciando sesión...' : 'Iniciar sesión'"
+        :animationEnabled="false"
+        :disabled="authStore.loading"
+        class="w-full"
+      />
     </form>
 
-    <div class="footer-section">
-      <p class="authorized-text">AUTHORIZED ACCESS ONLY</p>
-      <div class="footer-icons">
-        <a href="#" class="icon-link">?</a>
-        <a href="#" class="icon-link">🛡️</a>
-        <a href="#" class="icon-link">🌐</a>
-      </div>
-      <p class="copyright">Gestión Solidaria © 2024. All rights reserved.</p>
+    <!-- Footer -->
+    <div class="mt-8 pt-6 border-t border-line text-center">
+      <p class="text-xs text-ink-faint">Acceso restringido al personal autorizado.</p>
+      <p class="text-xs text-ink-faint mt-1">© 2025 Remmy.</p>
     </div>
   </div>
 </template>
-
-<style lang="scss">
-@import '@/assets/styles/form.css';
-
-.createAccount {
-  display: inline-block; /* O simplemente bórralo si es un <button>, ya que suelen serlo por defecto */
-  color: var(--primary);
-  cursor: pointer;
-}
-
-.createAccount:hover{
-  color: var(--primary-darkest)
-}
-
-.text-center {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.forgot-password {
-  font-size: 0.875rem;
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.forgot-password:hover {
-  text-decoration: underline;
-}
-
-.footer-section {
-  border-top: 1px solid #e5e7eb;
-  padding-top: 1.5rem;
-  text-align: center;
-}
-</style>
