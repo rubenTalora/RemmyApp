@@ -12,6 +12,17 @@ Para evitar confusiones al retomar el proyecto, ten en cuenta la siguiente organ
 
 ---
 
+## 🧠 Decisiones de Diseño y "Gotchas"
+
+Para los nuevos desarrolladores, aquí hay algunas decisiones arquitectónicas clave tomadas durante el desarrollo:
+
+- **Geolocalización Híbrida:** Las direcciones almacenan coordenadas en dos formatos: columnas `float` (`latitude`, `longitude`) para lectura fácil desde JS/TS, y un campo `geo_location` (PostGIS) para consultas espaciales. Existe un **Trigger en la DB** (`sync_geo_location`) que mantiene ambos sincronizados automáticamente. No es necesario calcular el punto geográfico en el frontend.
+- **Buscador de Direcciones Offline-first:** El sistema de códigos postales (`POSTAL_CODES`, `CITIES`, etc.) está diseñado para permitir que el administrador seleccione una dirección válida de España sin realizar llamadas a APIs externas de geocodificación (ahorro de costes y mayor velocidad).
+- **Tipado Estricto:** Se ha priorizado el uso de `database.types.ts`. Si una consulta a Supabase no parece tener los campos correctos, lo más probable es que falte actualizar los tipos tras una migración.
+- **Edge Functions para Admins:** La lógica de invitar o revocar administradores no se hace directamente en la tabla de perfiles, sino a través de **Edge Functions** para garantizar que solo un SuperAdmin pueda realizar estas operaciones críticas mediante la API de administración de Supabase.
+
+---
+
 ## 🚀 Arquitectura del Proyecto
 
 El proyecto ha evolucionado hacia una arquitectura moderna de **Frontend-as-a-Service**:
