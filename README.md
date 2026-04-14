@@ -1,40 +1,50 @@
-# Forget-me-now
+# 👵 RemmyApp
 
-## Presentació del projecte
+**RemmyApp** es una plataforma diseñada para facilitar la búsqueda, gestión y comparación de centros de cuidados y residencias para personas mayores. Este repositorio contiene el panel de administración (**RemmyAdmin**) y la infraestructura de backend basada en **Supabase**.
 
-https://youtube.com/shorts/LEy4lxutKO8?si=0v0gnmmwZWeAbKuw
+## 🌳 Gestión de Ramas
+
+Para evitar confusiones al retomar el proyecto, ten en cuenta la siguiente organización de ramas:
+
+- **`main` / `frontend-developing` (ACTUAL):** Contiene la versión más reciente del proyecto (Vue 3 + Supabase). Es la rama de trabajo recomendada.
+- **`backend-developing` / `CRUD` / `developing` (OBSOLETO):** Contienen el antiguo backend en Spring Boot. Estas ramas se mantienen solo por motivos históricos y no deben utilizarse.
+- **`vibecodeada-padre` (HISTÓRICO):** Contiene prototipos iniciales y recursos visuales (capturas en `stitch-downloads`).
 
 ---
 
-# Estudi de mercat
+## 🚀 Arquitectura del Proyecto
 
-## FindCareApp
-Web oficial:
-https://findcareapp.com/
+El proyecto ha evolucionado hacia una arquitectura moderna de **Frontend-as-a-Service**:
 
-###  Descripció
-FindCareApp és una plataforma internacional de directori que reuneix més de 800.000 instal·lacions de cures i serveis de salut.
+- **Frontend (Admin):** Desarrollado con **Vue 3 (Vite)**, **Tailwind CSS 4** y **Pinia**. Se encuentra en la carpeta `frontend/RemmyAdmin`.
+- **Backend (BaaS):** Gestión integral con **Supabase**, que incluye:
+  - **Base de Datos:** PostgreSQL con soporte para geolocalización (PostGIS).
+  - **Autenticación:** Sistema de usuarios y roles (Admin/SuperAdmin).
+  - **Edge Functions:** Lógica de servidor para invitaciones de administradores.
+  - **Storage:** Almacenamiento de imágenes de los centros.
 
-Permet:
-- Buscar centres per ubicació
-- Filtrar per tipus d’atenció especialitzada
-- Comparar institucions
-- Consultar informació detallada de cada centre
-- Realitzar tours virtuals
+## 📂 Estructura de Carpetas
 
-## Inforesidencias
-Web oficial:
-https://www.inforesidencias.com/infoclasificados/lista-anuncios
+```text
+/
+├── frontend/RemmyAdmin/    # Aplicación principal de administración
+│   ├── src/                # Código fuente (Vue, Pinia, Router)
+│   ├── supabase/           # Migraciones y Edge Functions
+│   └── scripts/            # Scripts de utilidad (seeding de datos)
+└── .atl/                   # Registro de habilidades de IA (uso interno)
+```
 
-## Descripció:
-Inforesidencias és una de les plataformes més conegudes a Espanya especialitzada en residències per a persones majors i serveis sociosanitaris.
+## 🛠️ Requisitos Previos
 
-Funciona principalment com a directori i portal informatiu del sector geriàtric.
+- **Node.js:** Versión 20 o superior (recomendado v22+).
+- **PNPM:** Gestor de paquetes recomendado.
+- **Supabase CLI:** Para gestionar las migraciones y funciones locales.
 
-### Permet:
-- Buscar residències, institucions mentals, centres de dia, i més. Per província o comunitat autònoma, situació de urgencia, diners, posibles ajudes publiques, etc.
-- Consultar informació bàsica dels centres
-- Accedir a anuncis classificats del sector
-- Publicar anuncis (centres i professionals)
-- Consultar notícies i contingut especialitzat
-- Accedir a formació i recursos per a professionals
+## 🏁 Cómo empezar
+
+Para instrucciones detalladas sobre cómo arrancar el panel de administración y configurar la base de datos, consulta el manual en:
+👉 [**Guía de Inicio de RemmyAdmin**](./frontend/RemmyAdmin/README.md)
+
+---
+
+*Proyecto desarrollado para facilitar la transición a un nuevo equipo de desarrollo.*
